@@ -1,0 +1,43 @@
+#Instalación de paquetes
+install.packages("vcd")
+install.packages("effects")
+install.packages("visreg")
+install.packages("arules")
+
+##Carga de librerías
+library(vcd)
+library(effects)
+library(visreg)
+library(arules)
+
+##Carga base de datos Artritis
+data(Arthritis)
+
+##Adjuntar base de datos
+attach(Arthritis)
+
+##DicretizaciÃ³n de edad de individuos con logntud de 17 años)
+discretize(Age, method = "interval", length = 17)
+Age_disc <- discretize(Age, method = "interval", length = 17)
+
+##Confirmamos tabla con grupos de edad en intervalos de 17 años
+table(Age_disc)
+
+###Generamos tabla cruzada entre mejoras de pacientes y edades discretizadas.
+table (Improved, Age_disc)
+
+###Buscamos asociación entre edades discretizadas y mejora en pacientes, pero primero buscamos identificar si son variables
+dependientes, o independientes. 
+chisq.test(Age_disc)$expected
+
+##No permite hacer la prueba porque hay valor 0, por lo tanto lo hacemos en excel, donde observamos que los valores esperados 
+y los observados son muy distintos, salvo cuando la mejoría es nula.
+
+###Aplicamos la prueba Ji cuadrada
+chisq.test(table(Age_disc,Improved))
+
+###Manda un mensaje de advertencia, ya que más del 20% de nuestros valores son inferiores a 5, por ello hacemos la prueba de Fisher
+fisher.test(table(Age_disc,Improved)) 
+
+###Esta prueba nos arroja un p-value de 0.006812, lo cual nos indica que hay una diferencia signficativa y por lo tanto sí hay una 
+asoción entre a edad discrtizada y los niveles de mejora de los pacientes. 
