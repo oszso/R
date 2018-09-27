@@ -3,12 +3,14 @@ install.packages("vcd")
 install.packages("effects")
 install.packages("visreg")
 install.packages("arules")
+install.packages("car")
 
 ##Carga de librerías
 library(vcd)
 library(effects)
 library(visreg)
 library(arules)
+library(car)
 
 ##Carga base de datos Artritis
 data(Arthritis)
@@ -28,16 +30,22 @@ table (Improved, Age_disc)
 
 ###Buscamos asociación entre edades discretizadas y mejora en pacientes, pero primero buscamos identificar si son variables
 dependientes, o independientes. 
-chisq.test(Age_disc)$expected
+chisq.test(table(Age_disc,Improved))$expected
 
-##No permite hacer la prueba porque hay valor 0, por lo tanto lo hacemos en excel, donde observamos que los valores esperados 
-y los observados son muy distintos, salvo cuando la mejoría es nula.
+### Observamos que en nuestra tabla hay dos valores esperados que son inferiores a 5, por lo tanto hacemos una agrupación entre
+las categorías Some y Marked, generando la variabale Improved_n
 
-###Aplicamos la prueba Ji cuadrada
-chisq.test(table(Age_disc,Improved))
+Improved_n<-recode(Improved, "'None'=0; 'Some'=1; 'Marked'=1;")
+chisq.test(table(Age_disc,Improved_n))$expected
 
-###Manda un mensaje de advertencia, ya que más del 20% de nuestros valores son inferiores a 5, por ello hacemos la prueba de Fisher
-fisher.test(table(Age_disc,Improved)) 
+###Con la nueva tabla, podemos observar que todas los valores esperados son mayores a 5, por lo tanto,porcedemos a hacer la prueba
+de Ji cuadrada. 
+chisq.test(table(Age_disc,Improved_n))
 
-###Esta prueba nos arroja un p-value de 0.006812, lo cual nos indica que hay una diferencia signficativa y por lo tanto sí hay una 
-asoción entre a edad discrtizada y los niveles de mejora de los pacientes. 
+###Manda un mensaje de advertencia, ya que más del 20% de nuestros valores son inferiores a 5, por ello hacemos una agrupación entre las
+categorías Some y Marked. Quedando 0 como None y 1 como Some y Marked
+Improved_a<-recode(Improved_n, "'None'=0; 'Some'=1; 'Marked'=1;")
+chisq.test(table(Age_disc,Improved_n))
+
+###Esta prueba nos arroja un p-value de 0.01752. Esto nos indica que hay una diferencia signficativa y por lo tanto sí hay una 
+asoción entre a edad discretizada y los niveles de mejora de los pacientes. 
